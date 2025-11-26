@@ -1,15 +1,18 @@
 import React, { useEffect, useState, useLayoutEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Animated } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, Animated, Platform } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import RemedioService from './RemedioService';
 import styles from './TelaPrincipalScreen.styles';
-import { AppThemeContext } from '../App';
+import AppThemeContext from '../AppThemeContext';
 
 export default function TelaPrincipalScreen({ navigation }) {
   const [remedios, setRemedios] = useState([]);
   const [nomePaciente, setNomePaciente] = useState('');
   const isFocused = useIsFocused();
-  const { scheme, fontSize } = useContext(AppThemeContext);
+  let { scheme, fontSize } = useContext(AppThemeContext);
+  if (Platform.OS === 'web') {
+    scheme = 'light';
+  }
 
   useEffect(() => {
     atualizarLista();
@@ -60,8 +63,8 @@ export default function TelaPrincipalScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#fff' }] }>
-      <Text style={[styles.titulo, { fontSize, color: scheme === 'dark' ? '#fff' : '#000', marginBottom: 8 }]}>Meus Remédios</Text>
+    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }] }>
+      <Text style={[styles.titulo, { fontSize, color: scheme === 'dark' ? '#fff' : '#1976d2', marginBottom: 8, fontWeight: 'bold' }]}>Meus Remédios</Text>
       {nomePaciente ? (
         <Text style={{ fontSize: fontSize + 2, color: '#1976d2', marginBottom: 12 }}>Bem-vindo, {nomePaciente}!</Text>
       ) : null}

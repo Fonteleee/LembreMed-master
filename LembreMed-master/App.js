@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Appearance, useColorScheme } from 'react-native';
-import React, { createContext, useState } from 'react';
+import React, { useState } from 'react';
 import * as Notifications from 'expo-notifications';
 
 import HomeScreen from './screens/HomeScreen';
@@ -12,10 +12,9 @@ import AdicionarRemedioScreen from './screens/AdicionarRemedioScreen';
 import BoasVindasScreen from './screens/BoasVindasScreen';
 import HistoricoScreen from './screens/HistoricoScreen';
 import RespiroScreen from './screens/RespiroScreen';
+import AppThemeContext from './AppThemeContext';
 
 const Stack = createNativeStackNavigator();
-
-export const AppThemeContext = createContext();
 
 export default function App() {
   const scheme = useColorScheme();

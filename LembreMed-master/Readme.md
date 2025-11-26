@@ -1,6 +1,6 @@
-# LembreMed
+# MedAlerta
 
-LembreMed é um aplicativo para ajudar você a lembrar de tomar seus medicamentos de forma simples, flexível e acessível.
+MedAlerta é um aplicativo para ajudar você a lembrar de tomar seus medicamentos de forma simples, flexível e acessível.
 
 ## Funcionalidades
 

@@ -1,13 +1,16 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { AppThemeContext } from '../App';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import AppThemeContext from '../AppThemeContext';
 import styles from './CadastroScreen.styles';
 
 export default function CadastroScreen({ navigation }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const { scheme, fontSize } = useContext(AppThemeContext);
+  let { scheme, fontSize } = useContext(AppThemeContext);
+  if (Platform.OS === 'web') {
+    scheme = 'light';
+  }
 
   const cadastrar = () => {
     if (nome.trim() && email.includes('@') && senha.length >= 6) {
@@ -19,18 +22,18 @@ export default function CadastroScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#E8F5E9' }] }>
-      <Text style={[styles.title, { fontSize, color: scheme === 'dark' ? '#fff' : '#2E7D32' }]}>Cadastro</Text>
+    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }] }>
+      <Text style={[styles.title, { fontSize, color: scheme === 'dark' ? '#fff' : '#1976d2', fontWeight: 'bold' }]}>Cadastro</Text>
 
       <TextInput
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={[styles.input, { fontSize, color: '#222' }]}
         placeholder="Nome"
         onChangeText={setNome}
         value={nome}
       />
 
       <TextInput
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={[styles.input, { fontSize, color: '#222' }]}
         placeholder="E-mail"
         keyboardType="email-address"
         onChangeText={setEmail}
@@ -38,7 +41,7 @@ export default function CadastroScreen({ navigation }) {
       />
 
       <TextInput
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={[styles.input, { fontSize, color: '#222' }]}
         placeholder="Senha (mín. 6 caracteres)"
         secureTextEntry
         onChangeText={setSenha}

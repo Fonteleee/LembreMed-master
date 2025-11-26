@@ -1,11 +1,14 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { AppThemeContext } from '../App';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import AppThemeContext from '../AppThemeContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const { scheme, fontSize } = useContext(AppThemeContext);
+  let { scheme, fontSize } = useContext(AppThemeContext);
+  if (Platform.OS === 'web') {
+    scheme = 'light';
+  }
 
   const handleLogin = () => {
     if(!email || !senha){
@@ -16,11 +19,11 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#E8F5E9' }] }>
-      <Text style={[styles.title, { fontSize, color: scheme === 'dark' ? '#fff' : '#2E7D32' }]}>Entrar no LembreMed</Text>
+    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }] }>
+      <Text style={[styles.title, { fontSize, color: scheme === 'dark' ? '#fff' : '#1976d2', fontWeight: 'bold' }]}>Entrar no MedAlerta</Text>
 
       <TextInput
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={[styles.input, { fontSize, color: '#222' }]}
         placeholder="E-mail"
         keyboardType="email-address"
         value={email}
@@ -28,7 +31,7 @@ export default function LoginScreen({ navigation }) {
       />
 
       <TextInput
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={[styles.input, { fontSize, color: '#222' }]}
         placeholder="Senha"
         secureTextEntry
         value={senha}

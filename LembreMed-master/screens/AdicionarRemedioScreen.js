@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOpacity, Text, Platform } from 'react-native';
 import RemedioService from './RemedioService';
-import { AppThemeContext } from '../App';
+import AppThemeContext from '../AppThemeContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
 
@@ -22,17 +22,70 @@ export default function AdicionarRemedioScreen({ navigation }) {
   const [dosagem, setDosagem] = useState('');
   const [cor, setCor] = useState('#4caf50');
   const [diasRecomendados, setDiasRecomendados] = useState('');
-  const { scheme, fontSize } = useContext(AppThemeContext);
+  let { scheme, fontSize } = useContext(AppThemeContext);
+  if (Platform.OS === 'web') {
+    scheme = 'light';
+  }
+
+  useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  }, []);
+
+  const solicitarPermissao = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Ative as notificações para receber lembretes.');
+      return false;
+    }
+    return true;
+  };
 
   const salvar = async () => {
     if (nome.trim() === '' || horarios.length === 0 || dosagem.trim() === '' || diasRecomendados.trim() === '') {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
+    const permitido = await solicitarPermissao();
+    if (!permitido) return;
     const dataAdicao = new Date();
     RemedioService.adicionarRemedio({ nome, horarios, frequencia, dosagem, cor, dataAdicao, diasRecomendados });
-    horarios.forEach(horario => {
+    horarios.forEach(async horario => {
       RemedioService.registrarUso(nome, typeof horario === 'string' ? horario : horario.toLocaleTimeString());
+      // Agendar notificação local
+      let horarioDate;
+      if (typeof horario === 'string') {
+        // Suporta formato HH:mm
+        const [h, m] = horario.split(':');
+        horarioDate = new Date();
+        horarioDate.setHours(Number(h));
+        horarioDate.setMinutes(Number(m));
+        horarioDate.setSeconds(0);
+        if (horarioDate < new Date()) {
+          // Se o horário já passou hoje, agenda para amanhã
+          horarioDate.setDate(horarioDate.getDate() + 1);
+        }
+      } else {
+        horarioDate = horario;
+        if (horarioDate < new Date()) {
+          horarioDate.setDate(horarioDate.getDate() + 1);
+        }
+      }
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `Hora de tomar ${nome}`,
+          body: `Dosagem: ${dosagem}. Não esqueça!`,
+          sound: true,
+        },
+        trigger: {
+          date: horarioDate,
+        },
+      });
     });
     navigation.goBack();
   };
@@ -58,12 +111,12 @@ export default function AdicionarRemedioScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#fff' }] }>
+    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }] }>
       <TextInput
         placeholder="Nome do remédio"
         value={nome}
         onChangeText={handleNomeChange}
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={[styles.input, { fontSize, color: '#222' }]}
       />
       {sugestoes.length > 0 && (
         <FlatList
