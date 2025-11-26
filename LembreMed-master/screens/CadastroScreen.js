@@ -12,7 +12,7 @@ export default function CadastroScreen({ navigation }) {
   const cadastrar = () => {
     if (nome.trim() && email.includes('@') && senha.length >= 6) {
       alert(`Cadastrado com sucesso!, ${nome}!`);
-      navigation.navigate('BoasVindas', { nomeUsuario: nome });
+      navigation.navigate('TelaPrincipal', { nomePaciente: nome });
     } else {
       alert('Preencha todos os campos corretamente.');
     }

@@ -23,8 +23,17 @@ class RemedioService {
     this.remedios = this.remedios.filter(item => item.nome !== nome);
   }
 
-  registrarUso(nome, horario) {
-    this.historico.push({ nome, horario, data: new Date() });
+  registrarUso(nome, acao, remedioInfo) {
+    const remedio = remedioInfo || this.remedios.find(item => item.nome === nome);
+    this.historico.push({ 
+      nome, 
+      horario: acao, // agora pode ser 'TOMEI' ou 'PULEI'
+      dosagem: remedio?.dosagem || '-',
+      cor: remedio?.cor || '#4caf50',
+      dataAdicao: remedio?.dataAdicao,
+      diasRecomendados: remedio?.diasRecomendados,
+      data: new Date()
+    });
   }
 
   listarHistorico() {

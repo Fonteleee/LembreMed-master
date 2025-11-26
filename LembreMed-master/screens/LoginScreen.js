@@ -8,14 +8,11 @@ export default function LoginScreen({ navigation }) {
   const { scheme, fontSize } = useContext(AppThemeContext);
 
   const handleLogin = () => {
-    // Aqui você pode validar ou navegar
-    
     if(!email || !senha){
       alert(`Email e Senha Obrigatórios`);
       return;
     }
-    navigation.navigate('BoasVindas');
-    //  navigation.navigate('BoasVindas', { nomeUsuario: nome });
+    navigation.navigate('TelaPrincipal', { nomePaciente: email.split('@')[0] });
   };
 
   return (

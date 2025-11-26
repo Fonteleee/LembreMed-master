@@ -11,6 +11,7 @@ import TelaPrincipalScreen from './screens/TelaPrincipalScreen';
 import AdicionarRemedioScreen from './screens/AdicionarRemedioScreen';
 import BoasVindasScreen from './screens/BoasVindasScreen';
 import HistoricoScreen from './screens/HistoricoScreen';
+import RespiroScreen from './screens/RespiroScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +60,11 @@ export default function App() {
             name="Historico"
             component={HistoricoScreen}
             options={{ title: 'Histórico' }}
+          />
+          <Stack.Screen
+            name="Respiro"
+            component={RespiroScreen}
+            options={{ title: 'Respire' }}
           />
         </Stack.Navigator>
       </NavigationContainer>

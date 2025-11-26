@@ -1,56 +1,50 @@
 # LembreMed
 
-O aplicativo LembreMed foi desenvolvido com o objetivo de ajudar usuários a se organizarem com os horários de seus remédios oferecendo uma interface simples prática e funcional
-
-## Sobre o Projeto
-
-O LembreMed é um app mobile criado em React Native com foco em lembrar o usuário de tomar seus medicamentos nos horários cadastrados
-
-Durante o desenvolvimento a organização das telas seguiu uma estrutura limpa e modular com os estilos separados em arquivos próprios para facilitar a manutenção
+LembreMed é um aplicativo para ajudar você a lembrar de tomar seus medicamentos de forma simples, flexível e acessível.
 
 ## Funcionalidades
 
-Cadastrar nome e horário do remédio  
-Listar todos os remédios cadastrados  
-Remover remédios da lista  
-Navegar entre telas com facilidade  
-Tela de boas vindas ao iniciar o app  
+- Cadastro de medicamentos com sugestão automática de nomes.
+- Adição de múltiplos horários para cada medicamento.
+- Seleção de frequência dos lembretes (diário, semanal, mensal).
+- Notificações persistentes (apenas mobile) até confirmação do usuário.
+- Histórico de medicamentos tomados, exibido em tela dedicada.
+- Suporte a modo escuro e fontes maiores para acessibilidade.
 
-## Tecnologias Utilizadas
+## Como usar
 
-React Native  
-JavaScript  
-React Navigation  
-Estilização com arquivos separados usando StyleSheet  
-Gerenciamento de estado com useState  
-useEffect e navegação com useIsFocused
+1. Instale as dependências:
 
-## Organização do Projeto
+   ```bash
+   npm install
+   ```
 
-Appjs gerencia a navegação entre as telas  
-BoasVindasScreenjs tela inicial com nome do app imagem e botão para começar  
-CadastroScreenjs formulário de cadastro de usuário  
-LoginScreenjs tela inicial com opção de entrar ou cadastrar sem autenticação funcional por enquanto  
-TelaPrincipalScreenjs lista todos os remédios adicionados com opção de remover  
-AdicionarRemedioScreenjs formulário para adicionar um novo remédio com nome e horário  
-RemedioServicejs simula um banco de dados local usando um array  
+2. Para rodar no navegador:
 
-## Como rodar o projeto
+   ```bash
+   npm run web
+   ```
 
-Clone o repositório com o comando git clone  
-Entre na pasta do projeto e instale as dependências com npm install  
-Execute o projeto com npm start  
-Utilize um emulador ou o aplicativo Expo Go para testar no celular
+3. Para rodar no celular (Expo Go):
 
-## Equipe
+   ```bash
+   npm start
+   ```
 
-O projeto foi feito em grupo com cinco pessoas  
-A maior parte do desenvolvimento do aplicativo incluindo as telas e a lógica principal foi feita por mim Megue Ellen  
-Outros colegas contribuíram com o banner apresentação identidade visual e apoio em funcionalidades futuras  
+   Escaneie o QR Code com o app Expo Go.
 
-## Status do Projeto
+## Estrutura do projeto
 
-Projeto finalizado para fins de apresentação acadêmica  
-Futuramente o app poderá incluir envio de notificações  
-autenticação com login e senha  
-e funcionalidade para incluir imagens dos remédios
+- `App.js`: Configuração principal e navegação.
+- `screens/AdicionarRemedioScreen.js`: Cadastro de medicamentos.
+- `screens/TelaPrincipalScreen.js`: Lista de medicamentos cadastrados.
+- `screens/HistoricoScreen.js`: Histórico de uso dos medicamentos.
+- `screens/RemedioService.js`: Serviço para gerenciar dados dos medicamentos.
+
+## Observações
+
+- As notificações funcionam apenas em dispositivos móveis.
+- Os dados são armazenados apenas em memória (não persistem após fechar o app).
+- Recomendo adaptar para uso de banco local ou nuvem para maior segurança.
+
+Feito com carinho para facilitar sua rotina de saúde!
