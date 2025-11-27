@@ -1,19 +1,26 @@
+// HistoricoScreen.js
+// Tela o histórico de uso dos medicamentos
 import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, FlatList, Platform } from 'react-native';
 import RemedioService from './RemedioService';
 import AppThemeContext from '../AppThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HistoricoScreen() {
   const [historico, setHistorico] = useState([]);
   let { scheme, fontSize } = useContext(AppThemeContext);
-  if (Platform.OS === 'web') {
-    scheme = 'light';
-  }
+  if (Platform.OS === 'web') scheme = 'light';
 
+  // Busca histórico salvo
   useEffect(() => {
-    setHistorico(RemedioService.listarHistorico());
+    const buscarHistorico = async () => {
+      await RemedioService.carregarDados();
+      setHistorico(RemedioService.listarHistorico());
+    };
+    buscarHistorico();
   }, []);
 
+  // Renderização do histórico
   return (
     <View style={{ flex: 1, padding: 16, backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }}>
       <Text style={{ fontSize: fontSize + 4, marginBottom: 12, color: scheme === 'dark' ? '#fff' : '#1976d2', fontWeight: 'bold' }}>
@@ -25,7 +32,7 @@ export default function HistoricoScreen() {
         renderItem={({ item }) => (
           <View style={{ borderLeftWidth: 8, borderLeftColor: item.cor || '#4caf50', marginBottom: 8, paddingLeft: 8 }}>
             <Text style={{ fontSize, color: '#222' }}>
-              {item.nome} - {item.horario} - {item.dosagem || '-'}
+              {item.nome} {item.acao ? `- ${item.acao}` : ''} - {item.horarios} - {item.dosagem || '-'}
             </Text>
             <Text style={{ fontSize: fontSize - 2, color: '#222' }}>
               Adicionado em: {item.dataAdicao ? new Date(item.dataAdicao).toLocaleString() : '-'}

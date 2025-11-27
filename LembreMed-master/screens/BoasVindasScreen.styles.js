@@ -1,3 +1,5 @@
+// BoasVindasScreen.styles.js
+// Estilos tela de boas-vindas
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({

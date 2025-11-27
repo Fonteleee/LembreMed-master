@@ -1,32 +1,32 @@
+
+// Tela principal do app, mostra os medicamentos cadastrados
 import React, { useEffect, useState, useLayoutEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, Animated, Platform } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import RemedioService from './RemedioService';
 import styles from './TelaPrincipalScreen.styles';
 import AppThemeContext from '../AppThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function TelaPrincipalScreen({ navigation }) {
   const [remedios, setRemedios] = useState([]);
   const [nomePaciente, setNomePaciente] = useState('');
   const isFocused = useIsFocused();
   let { scheme, fontSize } = useContext(AppThemeContext);
-  if (Platform.OS === 'web') {
-    scheme = 'light';
-  }
+  if (Platform.OS === 'web') scheme = 'light';
 
+  // Busca nome do usuário e lista de medicamentos
   useEffect(() => {
+    const buscarUsuario = async () => {
+      const usuarioSalvo = await AsyncStorage.getItem('usuario');
+      if(usuarioSalvo){
+        const usuario = JSON.parse(usuarioSalvo);
+        setNomePaciente(usuario.nome);
+      }
+    };
+    buscarUsuario();
     atualizarLista();
   }, [isFocused]);
-
-  useEffect(() => {
-    if (navigation && navigation.getParam) {
-      const nome = navigation.getParam('nomePaciente', '');
-      setNomePaciente(nome);
-    }
-    if (navigation && navigation.route && navigation.route.params && navigation.route.params.nomePaciente) {
-      setNomePaciente(navigation.route.params.nomePaciente);
-    }
-  }, [navigation]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -52,16 +52,19 @@ export default function TelaPrincipalScreen({ navigation }) {
     });
   }, [navigation, fontSize]);
 
-  const atualizarLista = () => {
-    const lista = RemedioService.listarRemedios();
-    setRemedios([...lista]);
+  // Atualiza lista de medicamentos
+  const atualizarLista = async () => {
+    await RemedioService.carregarDados();
+    setRemedios(RemedioService.listarRemedios());
   };
 
+  // Remove medicamento
   const removerRemedio = (nome) => {
     RemedioService.removerRemedio(nome);
     atualizarLista();
   };
 
+  // Render da tela principal
   return (
     <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }] }>
       <Text style={[styles.titulo, { fontSize, color: scheme === 'dark' ? '#fff' : '#1976d2', marginBottom: 8, fontWeight: 'bold' }]}>Meus Remédios</Text>
@@ -72,7 +75,7 @@ export default function TelaPrincipalScreen({ navigation }) {
         data={remedios}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => {
-          // Corrige comparação de datas para garantir relação correta
+          // Calcula aderência e dias restantes
           const checklist = RemedioService.listarHistorico().filter(h => {
             if (h.nome !== item.nome) return false;
             if (h.dataAdicao && item.dataAdicao) {
@@ -100,6 +103,7 @@ export default function TelaPrincipalScreen({ navigation }) {
               Animated.timing(scale, { toValue: 1, duration: 100, useNativeDriver: true })
             ]).start();
           };
+          // Registra uso do medicamento
           const handleChecklist = (acao) => {
             animateButton();
             RemedioService.registrarUso(item.nome, acao, item);
@@ -108,7 +112,12 @@ export default function TelaPrincipalScreen({ navigation }) {
             <View style={[styles.card, { borderLeftWidth: 8, borderLeftColor: item.cor || '#4caf50' }] }>
               <View style={styles.cardInfo}>
                 <Text style={[styles.nome, { fontSize }]}>{item.nome}</Text>
-                <Text style={[styles.horario, { fontSize }]}>Horários: {Array.isArray(item.horarios) ? item.horarios.map(h => typeof h === 'string' ? h : h.toLocaleTimeString()).join(', ') : item.horario}</Text>
+                <Text style={[styles.horario, { fontSize }]}>Horários: {Array.isArray(item.horarios) ? item.horarios.map(h => {
+                  if (typeof h === 'string' && h.includes('T')) {
+                    return new Date(h).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  }
+                  return h;
+                }).join(', ') : item.horario}</Text>
                 <Text style={[styles.horario, { fontSize }]}>Frequência: {item.frequencia || '-'}</Text>
                 <Text style={[styles.horario, { fontSize }]}>Dosagem: {item.dosagem || '-'}</Text>
                 <Text style={[styles.horario, { fontSize }]}>Adicionado em: {item.dataAdicao ? new Date(item.dataAdicao).toLocaleString() : '-'}</Text>

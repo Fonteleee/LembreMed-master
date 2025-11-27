@@ -1,17 +1,17 @@
 # MedAlerta
 
-MedAlerta é um aplicativo para ajudar você a lembrar de tomar seus medicamentos de forma simples, flexível e acessível.
+Esse projeto surgiu para atender uma necessidade real e tem como objetivo ajudar qualquer pessoa a lembrar de tomar seus remédios, de um jeito fácil e prático.
 
-## Funcionalidades
+## O que o app faz
 
-- Cadastro de medicamentos com sugestão automática de nomes.
-- Adição de múltiplos horários para cada medicamento.
-- Seleção de frequência dos lembretes (diário, semanal, mensal).
-- Notificações persistentes (apenas mobile) até confirmação do usuário.
-- Histórico de medicamentos tomados, exibido em tela dedicada.
-- Suporte a modo escuro e fontes maiores para acessibilidade.
+- Permite cadastrar medicamentos e escolher horários para tomar cada um.
+- Dá sugestões de nomes de remédios para facilitar.
+- Você pode escolher se o lembrete será diário, semanal ou mensal.
+- O app envia notificações no horário certo (funciona melhor no celular).
+- Tem uma tela de histórico para ver tudo que já foi tomado ou pulado.
+- Dá para usar modo escuro e aumentar a fonte, se preferir.
 
-## Como usar
+## Como rodar
 
 1. Instale as dependências:
 
@@ -19,7 +19,7 @@ MedAlerta é um aplicativo para ajudar você a lembrar de tomar seus medicamento
    npm install
    ```
 
-2. Para rodar no navegador:
+2. Para testar no navegador:
 
    ```bash
    npm run web
@@ -31,20 +31,21 @@ MedAlerta é um aplicativo para ajudar você a lembrar de tomar seus medicamento
    npm start
    ```
 
-   Escaneie o QR Code com o app Expo Go.
+   Depois, é só escanear o QR Code com o app Expo Go.
 
 ## Estrutura do projeto
 
-- `App.js`: Configuração principal e navegação.
-- `screens/AdicionarRemedioScreen.js`: Cadastro de medicamentos.
-- `screens/TelaPrincipalScreen.js`: Lista de medicamentos cadastrados.
-- `screens/HistoricoScreen.js`: Histórico de uso dos medicamentos.
-- `screens/RemedioService.js`: Serviço para gerenciar dados dos medicamentos.
+- `App.js`: Onde tudo começa, configura as telas e o tema.
+- `screens/AdicionarRemedioScreen.js`: Tela para cadastrar/remédios.
+- `screens/TelaPrincipalScreen.js`: Lista dos seus medicamentos.
+- `screens/HistoricoScreen.js`: Mostra o histórico de uso.
+- `screens/RemedioService.js`: Gerencia os dados dos medicamentos.
+- Outras telas: Boas-vindas, login, cadastro, respiração guiada para ansiedade.
 
 ## Observações
 
-- As notificações funcionam apenas em dispositivos móveis.
-- Os dados são armazenados apenas em memória (não persistem após fechar o app).
-- Recomendo adaptar para uso de banco local ou nuvem para maior segurança.
+- As notificações funcionam melhor no celular, pois o navegador tem limitações.
+- Os dados ficam salvos localmente no aparelho.
+- O app foi feito para fins acadêmicos, mas pode ser adaptado para uso real.
 
-Feito com carinho para facilitar sua rotina de saúde!
+Feito com dedicação para ajudar na rotina de saúde!

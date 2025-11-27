@@ -1,3 +1,5 @@
+
+// Estilos para a tela principal dos medicamentos
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
@@ -42,20 +44,22 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
   vazio: {
-    textAlign: 'center',
-    marginTop: 50,
+    fontSize: 16,
     color: '#888',
+    textAlign: 'center',
+    marginTop: 40,
   },
   botao: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
+    backgroundColor: '#43a047',
+    paddingVertical: 14,
+    paddingHorizontal: 30,
     borderRadius: 10,
-    marginTop: 20,
+    marginVertical: 10,
     alignItems: 'center',
   },
   botaoTexto: {
     color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
-    fontSize: 16,
   },
 });

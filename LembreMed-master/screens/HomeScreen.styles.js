@@ -1,4 +1,5 @@
-// HomeScreen.styles.js
+
+// Estilos tela inicial do app
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
@@ -39,8 +40,5 @@ export default StyleSheet.create({
     backgroundColor: '#43a047',
     borderWidth: 2,
     borderColor: '#1976d2',
-  },
-  outlineText: {
-    color: '#fff',
   },
 });

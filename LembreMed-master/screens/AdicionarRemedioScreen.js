@@ -1,18 +1,21 @@
+// AdicionarRemedioScreen.js
 import React, { useState, useContext, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, FlatList, TouchableOpacity, Text, Platform } from 'react-native';
+import { View, TextInput, Button, Alert, FlatList, TouchableOpacity, Text, Platform } from 'react-native';
 import RemedioService from './RemedioService';
 import AppThemeContext from '../AppThemeContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
 
-const medicamentos = ['Dipirona', 'Paracetamol', 'Ibuprofeno', 'Amoxicilina', 'Omeprazol'];
-const frequencias = [
+// Lista de sugestões para facilitar o cadastro
+const listaMedicamentos = ['Dipirona', 'Paracetamol', 'Ibuprofeno', 'Amoxicilina', 'Omeprazol'];
+const opcoesFrequencia = [
   { label: 'Diário', value: 'diario' },
   { label: 'Semanal', value: 'semanal' },
   { label: 'Mensal', value: 'mensal' }
 ];
 
 export default function AdicionarRemedioScreen({ navigation }) {
+  // Estados do formulário
   const [nome, setNome] = useState('');
   const [horarios, setHorarios] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
@@ -22,10 +25,10 @@ export default function AdicionarRemedioScreen({ navigation }) {
   const [dosagem, setDosagem] = useState('');
   const [cor, setCor] = useState('#4caf50');
   const [diasRecomendados, setDiasRecomendados] = useState('');
+  const [horarioSelecionado, setHorarioSelecionado] = useState(null);
+  const [dataAlerta, setDataAlerta] = useState(new Date());
   let { scheme, fontSize } = useContext(AppThemeContext);
-  if (Platform.OS === 'web') {
-    scheme = 'light';
-  }
+  if (Platform.OS === 'web') scheme = 'light';
 
   useEffect(() => {
     Notifications.setNotificationHandler({
@@ -37,86 +40,90 @@ export default function AdicionarRemedioScreen({ navigation }) {
     });
   }, []);
 
-  const solicitarPermissao = async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Ative as notificações para receber lembretes.');
-      return false;
-    }
-    return true;
-  };
-
+  // Função para salvar o remédio e agendar notificação
   const salvar = async () => {
-    if (nome.trim() === '' || horarios.length === 0 || dosagem.trim() === '' || diasRecomendados.trim() === '') {
+    if (!nome.trim() || horarios.length === 0 || !dosagem.trim() || !diasRecomendados.trim()) {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
-    const permitido = await solicitarPermissao();
-    if (!permitido) return;
     const dataAdicao = new Date();
-    RemedioService.adicionarRemedio({ nome, horarios, frequencia, dosagem, cor, dataAdicao, diasRecomendados });
+    RemedioService.adicionarRemedio({ nome, horarios, frequencia, dosagem, cor, dataAdicao, diasRecomendados, dataAlerta });
+    // Agenda notificação para cada horário
     horarios.forEach(async horario => {
-      RemedioService.registrarUso(nome, typeof horario === 'string' ? horario : horario.toLocaleTimeString());
-      // Agendar notificação local
+      let horarioStr;
       let horarioDate;
       if (typeof horario === 'string') {
-        // Suporta formato HH:mm
+        horarioStr = horario;
         const [h, m] = horario.split(':');
-        horarioDate = new Date();
+        horarioDate = new Date(dataAlerta);
         horarioDate.setHours(Number(h));
         horarioDate.setMinutes(Number(m));
         horarioDate.setSeconds(0);
         if (horarioDate < new Date()) {
-          // Se o horário já passou hoje, agenda para amanhã
-          horarioDate.setDate(horarioDate.getDate() + 1);
+          if (frequencia === 'diario') horarioDate.setDate(horarioDate.getDate() + 1);
+          if (frequencia === 'semanal') horarioDate.setDate(horarioDate.getDate() + 7);
+          if (frequencia === 'mensal') horarioDate.setMonth(horarioDate.getMonth() + 1);
         }
       } else {
-        horarioDate = horario;
+        horarioStr = horario.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        horarioDate = new Date(dataAlerta);
+        horarioDate.setHours(horario.getHours());
+        horarioDate.setMinutes(horario.getMinutes());
+        horarioDate.setSeconds(0);
         if (horarioDate < new Date()) {
-          horarioDate.setDate(horarioDate.getDate() + 1);
+          if (frequencia === 'diario') horarioDate.setDate(horarioDate.getDate() + 1);
+          if (frequencia === 'semanal') horarioDate.setDate(horarioDate.getDate() + 7);
+          if (frequencia === 'mensal') horarioDate.setMonth(horarioDate.getMonth() + 1);
         }
       }
+      RemedioService.registrarUso(nome, horarioStr);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: `Hora de tomar ${nome}`,
           body: `Dosagem: ${dosagem}. Não esqueça!`,
           sound: true,
         },
-        trigger: {
-          date: horarioDate,
-        },
+        trigger:
+          frequencia === 'diario'
+            ? { date: horarioDate, repeats: true }
+            : frequencia === 'semanal'
+            ? { date: horarioDate, repeats: true, interval: 'week' }
+            : frequencia === 'mensal'
+            ? { date: horarioDate, repeats: true, interval: 'month' }
+            : { date: horarioDate, repeats: false },
       });
     });
     navigation.goBack();
   };
 
-  const handleNomeChange = (text) => {
-    setNome(text);
-    setSugestoes(medicamentos.filter(med => med.toLowerCase().includes(text.toLowerCase())));
+  // Sugestão automática de medicamentos
+  const handleNomeChange = (texto) => {
+    setNome(texto);
+    setSugestoes(listaMedicamentos.filter(med => med.toLowerCase().includes(texto.toLowerCase())));
   };
 
+  // Adiciona horário selecionado
   const handleAddHorario = (event, selectedDate) => {
-    setShowPicker(false);
-    if (Platform.OS === 'web') {
-      // No web, usar input manual
-      if (horarioManual.trim() !== '') {
-        setHorarios([...horarios, horarioManual]);
-        setHorarioManual('');
-      }
+    if (Platform.OS !== 'web') {
+      if (selectedDate) setHorarioSelecionado(selectedDate);
+      setShowPicker(false);
     } else {
-      if (selectedDate) {
-        setHorarios([...horarios, selectedDate]);
+      setShowPicker(false);
+      if (horarioManual.trim() !== '') {
+        setHorarioSelecionado(horarioManual);
+        setHorarioManual('');
       }
     }
   };
 
+  // Render  formulário
   return (
-    <View style={[styles.container, { backgroundColor: scheme === 'dark' ? '#222' : '#f7f7f7' }] }>
+    <View style={{ flex: 1, padding: 20 }}>
       <TextInput
         placeholder="Nome do remédio"
         value={nome}
         onChangeText={handleNomeChange}
-        style={[styles.input, { fontSize, color: '#222' }]}
+        style={{ borderWidth: 1, borderColor: '#aaa', borderRadius: 8, padding: 10, fontSize, marginBottom: 10 }}
       />
       {sugestoes.length > 0 && (
         <FlatList
@@ -124,7 +131,7 @@ export default function AdicionarRemedioScreen({ navigation }) {
           keyExtractor={item => item}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => { setNome(item); setSugestoes([]); }}>
-              <Text style={{ padding: 8, fontSize, color: scheme === 'dark' ? '#fff' : '#000' }}>{item}</Text>
+              <Text style={{ padding: 8, fontSize }}>{item}</Text>
             </TouchableOpacity>
           )}
         />
@@ -145,22 +152,47 @@ export default function AdicionarRemedioScreen({ navigation }) {
             placeholder="Horário (ex: 08:00)"
             value={horarioManual}
             onChangeText={setHorarioManual}
-            style={[styles.input, { width: 100, fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+            style={{ borderWidth: 1, borderColor: '#aaa', borderRadius: 8, padding: 10, width: 100, fontSize }}
           />
           <Button title="OK" onPress={handleAddHorario} />
+        </View>
+      )}
+      {horarioSelecionado && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+          <Text style={{ fontSize, marginRight: 8 }}>
+            {typeof horarioSelecionado === 'string' ? horarioSelecionado : horarioSelecionado.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+          <Button title="Salvar Horário" onPress={() => {
+            setHorarios([...horarios, horarioSelecionado]);
+            setHorarioSelecionado(null);
+          }} />
+          <Button title="Cancelar" onPress={() => setHorarioSelecionado(null)} />
         </View>
       )}
       <FlatList
         data={horarios}
         keyExtractor={(item, idx) => idx.toString()}
-        renderItem={({ item }) => (
-          <Text style={{ fontSize, color: scheme === 'dark' ? '#fff' : '#000' }}>{typeof item === 'string' ? item : item.toLocaleTimeString()}</Text>
+        renderItem={({ item, index }) => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+            <Text style={{ fontSize, flex: 1 }}>
+              {typeof item === 'string' ? item : item.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+            <TouchableOpacity onPress={() => {
+              setHorarioSelecionado(item);
+              setHorarios(horarios.filter((_, idx) => idx !== index));
+            }} style={{ marginHorizontal: 4, backgroundColor: '#1976d2', padding: 6, borderRadius: 4 }}>
+              <Text style={{ color: '#fff', fontSize }}>Editar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setHorarios(horarios.filter((_, idx) => idx !== index))} style={{ backgroundColor: '#e53935', padding: 6, borderRadius: 4 }}>
+              <Text style={{ color: '#fff', fontSize }}>Remover</Text>
+            </TouchableOpacity>
+          </View>
         )}
       />
       <Text style={{ fontSize, marginTop: 10 }}>Frequência:</Text>
       <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-        {frequencias.map(item => (
-          <TouchableOpacity key={item.value} onPress={() => setFrequencia(item.value)} style={{ margin: 5, padding: 8, backgroundColor: frequencia === item.value ? item.cor || '#4caf50' : '#ccc', borderRadius: 8 }}>
+        {opcoesFrequencia.map(item => (
+          <TouchableOpacity key={item.value} onPress={() => setFrequencia(item.value)} style={{ margin: 5, padding: 8, backgroundColor: frequencia === item.value ? cor : '#ccc', borderRadius: 8 }}>
             <Text style={{ fontSize, color: '#fff' }}>{item.label}</Text>
           </TouchableOpacity>
         ))}
@@ -169,7 +201,7 @@ export default function AdicionarRemedioScreen({ navigation }) {
         placeholder="Dosagem (ex: 500mg)"
         value={dosagem}
         onChangeText={setDosagem}
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={{ borderWidth: 1, borderColor: '#aaa', borderRadius: 8, padding: 10, fontSize, marginBottom: 10 }}
       />
       <Text style={{ fontSize, marginTop: 10 }}>Cor do medicamento:</Text>
       <View style={{ flexDirection: 'row', marginBottom: 10 }}>
@@ -182,35 +214,20 @@ export default function AdicionarRemedioScreen({ navigation }) {
         value={diasRecomendados}
         onChangeText={setDiasRecomendados}
         keyboardType="numeric"
-        style={[styles.input, { fontSize, color: scheme === 'dark' ? '#fff' : '#000' }]}
+        style={{ borderWidth: 1, borderColor: '#aaa', borderRadius: 8, padding: 10, fontSize, marginBottom: 10 }}
       />
+      <View style={{ marginVertical: 8 }}>
+        <Text style={{ fontSize, marginBottom: 4 }}>Data inicial do alerta:</Text>
+        <DateTimePicker
+          value={dataAlerta}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            if (selectedDate) setDataAlerta(selectedDate);
+          }}
+        />
+      </View>
       <Button title="Salvar" onPress={salvar} />
     </View>
   );
 }
-
-async function agendarNotificacao(medicamento, horario, frequencia) {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'Hora do medicamento!',
-      body: `Tomar ${medicamento}`,
-      sound: true,
-      sticky: true,
-    },
-    trigger: {
-      hour: horario.getHours(),
-      minute: horario.getMinutes(),
-      repeats: true,
-    },
-  });
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, gap: 15 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 8,
-    padding: 10,
-  },
-});

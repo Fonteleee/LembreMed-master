@@ -1,4 +1,5 @@
-// CadastroScreen.styles.js
+
+// Estilos para tela de cadastro/perfil
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
@@ -38,11 +39,5 @@ export default StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
-  },
-  link: {
-    color: '#2E7D32',
-    marginTop: 20,
-    fontWeight: '500',
-    textDecorationLine: 'underline',
   },
 });
